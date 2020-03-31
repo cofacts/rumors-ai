@@ -1,0 +1,489 @@
+type Article {
+  id: String
+  text: String
+  createdAt: String
+  updatedAt: String
+  references: [ArticleReference]
+  replyCount: Int
+
+  articleReplies(
+    status: ArticleReplyStatusEnum
+  ): [ArticleReply]
+  articleCategories(
+    status: ArticleCategoryStatusEnum
+  ): [ArticleCategory]
+
+  categoryCount: Int
+  replyRequests: [ReplyRequest]
+  replyRequestCount: Int
+  lastRequestedAt: String
+
+  requestedForReply: Boolean
+
+  user: User
+  relatedArticles(
+    filter: RelatedArticleFilter
+    orderBy: [RelatedArticleOrderBy]
+
+    first: Int = 10
+
+    after: String
+
+    before: String
+  ): ArticleConnection
+
+  hyperlinks: [Hyperlink]
+}
+
+type ArticleCategory {
+  categoryId: String
+  category: Category
+  articleId: String
+  article: Article
+
+  user: User
+  canUpdateStatus: Boolean
+  feedbackCount: Int
+  positiveFeedbackCount: Int
+  negativeFeedbackCount: Int
+  feedbacks: [ArticleCategoryFeedback]
+
+  ownVote: FeedbackVote
+  status: ArticleCategoryStatusEnum
+  createdAt: String
+  updatedAt: String
+}
+
+type ArticleCategoryConnnection {
+  totalCount: Int
+  edges: [ArticleCategoryConnnectionEdges]
+  pageInfo: ArticleCategoryConnnectionPageInfo
+}
+
+type ArticleCategoryConnnectionEdges {
+  node: ArticleCategory
+  cursor: String
+  score: Float
+}
+
+type ArticleCategoryConnnectionPageInfo {
+  lastCursor: String
+
+  firstCursor: String
+}
+
+type ArticleCategoryFeedback {
+  id: String
+  user: User
+  comment: String
+
+  vote: FeedbackVote
+  createdAt: String
+  updatedAt: String
+}
+
+enum ArticleCategoryStatusEnum {
+  NORMAL
+  DELETED
+}
+
+type ArticleConnection {
+  totalCount: Int
+  edges: [ArticleConnectionEdges]
+  pageInfo: ArticleConnectionPageInfo
+}
+
+type ArticleConnectionEdges {
+  node: Article
+  cursor: String
+  score: Float
+}
+
+type ArticleConnectionPageInfo {
+  lastCursor: String
+
+  firstCursor: String
+}
+
+type ArticleReference {
+  createdAt: String
+  type: ArticleReferenceTypeEnum
+  permalink: String
+}
+
+input ArticleReferenceInput {
+  type: ArticleReferenceTypeEnum!
+  permalink: String
+}
+
+enum ArticleReferenceTypeEnum {
+  URL
+
+  LINE
+}
+
+type ArticleReply {
+  replyId: String
+  reply: Reply
+  articleId: String
+  article: Article
+
+  user: User
+  canUpdateStatus: Boolean
+  feedbackCount: Int
+  positiveFeedbackCount: Int
+  negativeFeedbackCount: Int
+  feedbacks: [ArticleReplyFeedback]
+
+  ownVote: FeedbackVote
+  status: ArticleReplyStatusEnum
+  createdAt: String
+  updatedAt: String
+}
+
+type ArticleReplyFeedback {
+  id: String
+  user: User
+  comment: String
+
+  vote: FeedbackVote
+
+  score: Int @deprecated(reason: "Use vote instead")
+}
+
+enum ArticleReplyStatusEnum {
+  NORMAL
+  DELETED
+}
+
+type Category {
+  id: String
+  title: String
+  description: String
+  createdAt: String
+  updatedAt: String
+  articleCategories(
+    filter: CategoryArticleCategoriesFilter
+    orderBy: [CategoryArticleCategoriesOrderBy]
+
+    first: Int = 10
+
+    after: String
+
+    before: String
+  ): ArticleCategoryConnnection
+}
+
+input CategoryArticleCategoriesFilter {
+  status: ArticleCategoryStatusEnum
+}
+
+input CategoryArticleCategoriesOrderBy {
+  createdAt: SortOrderEnum
+}
+
+enum FeedbackVote {
+  UPVOTE
+  NEUTRAL
+  DOWNVOTE
+}
+
+type Hyperlink {
+  url: String
+
+  normalizedUrl: String
+  title: String
+  summary: String
+  topImageUrl: String
+  fetchedAt: String
+  status: String
+  error: String
+}
+
+input ListArticleCategoryCountExpr {
+  LT: Int
+  GT: Int
+  EQ: Int
+}
+
+input ListArticleFilter {
+  replyCount: ListArticleReplyCountExpr
+
+  categoryCount: ListArticleCategoryCountExpr
+
+  categoryIds: [String]
+
+  moreLikeThis: ListArticleMoreLikeThisInput
+
+  replyRequestCount: ListArticleReplyRequestCountExpr
+
+  appId: String
+
+  userId: String
+
+  fromUserOfArticleId: String
+}
+
+input ListArticleMoreLikeThisInput {
+  like: String
+  minimumShouldMatch: String
+}
+
+input ListArticleOrderBy {
+  _score: SortOrderEnum
+  updatedAt: SortOrderEnum
+  createdAt: SortOrderEnum
+  replyRequestCount: SortOrderEnum
+  replyCount: SortOrderEnum
+  lastRequestedAt: SortOrderEnum
+  lastRepliedAt: SortOrderEnum
+}
+
+input ListArticleReplyCountExpr {
+  LT: Int
+  GT: Int
+  EQ: Int
+}
+
+input ListArticleReplyRequestCountExpr {
+  LT: Int
+  GT: Int
+  EQ: Int
+}
+
+type ListCategoryConnection {
+  totalCount: Int
+  edges: [ListCategoryConnectionEdges]
+  pageInfo: ListCategoryConnectionPageInfo
+}
+
+type ListCategoryConnectionEdges {
+  node: Category
+  cursor: String
+  score: Float
+}
+
+type ListCategoryConnectionPageInfo {
+  lastCursor: String
+
+  firstCursor: String
+}
+
+input ListCategoryOrderBy {
+  createdAt: SortOrderEnum
+}
+
+type ListReplyConnection {
+  totalCount: Int
+  edges: [ListReplyConnectionEdges]
+  pageInfo: ListReplyConnectionPageInfo
+}
+
+type ListReplyConnectionEdges {
+  node: Reply
+  cursor: String
+  score: Float
+}
+
+type ListReplyConnectionPageInfo {
+  lastCursor: String
+
+  firstCursor: String
+}
+
+input ListReplyFilter {
+  moreLikeThis: ListReplyMoreLikeThisInput
+
+  selfOnly: Boolean
+
+  type: ReplyTypeEnum
+}
+
+input ListReplyMoreLikeThisInput {
+  like: String
+  minimumShouldMatch: String
+}
+
+input ListReplyOrderBy {
+  _score: SortOrderEnum
+  createdAt: SortOrderEnum
+}
+
+type Mutation {
+  CreateArticle(
+    text: String!
+    reference: ArticleReferenceInput!
+
+    reason: String
+  ): MutationResult
+
+  CreateReply(
+    articleId: String!
+    text: String!
+    type: ReplyTypeEnum!
+    reference: String
+
+    waitForHyperlinks: Boolean = false
+  ): MutationResult
+
+  CreateArticleReply(articleId: String!, replyId: String!): [ArticleReply]
+
+  CreateArticleCategory(articleId: String!, categoryId: String!): [ArticleCategory]
+
+  CreateReplyRequest(
+    articleId: String!
+
+    reason: String
+  ): Article @deprecated(reason: "Use CreateOrUpdateReplyRequest instead")
+
+  CreateOrUpdateReplyRequest(
+    articleId: String!
+
+    reason: String
+  ): Article
+
+  CreateOrUpdateArticleReplyFeedback(articleId: String!, replyId: String!, vote: FeedbackVote!, comment: String): ArticleReply
+
+  CreateOrUpdateArticleCategoryFeedback(articleId: String!, categoryId: String!, vote: FeedbackVote!, comment: String): ArticleCategory
+
+  CreateOrUpdateReplyRequestFeedback(replyRequestId: String!, vote: FeedbackVote!): ReplyRequest
+
+  UpdateArticleReplyStatus(articleId: String!, replyId: String!, status: ArticleReplyStatusEnum!): [ArticleReply]
+
+  UpdateArticleCategoryStatus(articleId: String!, categoryId: String!, status: ArticleCategoryStatusEnum!): [ArticleCategory]
+
+  UpdateUser(name: String!): User
+}
+
+type MutationResult {
+  id: String
+}
+
+type PointInfo {
+  total: Int
+
+  currentLevel: Int
+
+  nextLevel: Int
+}
+
+type Query {
+  GetArticle(id: String): Article
+  GetReply(id: String): Reply
+
+  GetUser(id: String): User
+  ListArticles(
+    filter: ListArticleFilter
+    orderBy: [ListArticleOrderBy]
+
+    first: Int = 10
+
+    after: String
+
+    before: String
+  ): ArticleConnection
+  ListReplies(
+    filter: ListReplyFilter
+    orderBy: [ListReplyOrderBy]
+
+    first: Int = 10
+
+    after: String
+
+    before: String
+  ): ListReplyConnection
+  ListCategories(
+    orderBy: [ListCategoryOrderBy]
+
+    first: Int = 10
+
+    after: String
+
+    before: String
+  ): ListCategoryConnection
+}
+
+input RelatedArticleFilter {
+  replyCount: ReplyCountExpr
+}
+
+input RelatedArticleOrderBy {
+  _score: SortOrderEnum
+  updatedAt: SortOrderEnum
+}
+
+type Reply {
+  id: String
+
+  user: User
+  createdAt: String
+  text: String
+  type: ReplyTypeEnum
+  reference: String
+  articleReplies(
+    status: ArticleReplyStatusEnum
+  ): [ArticleReply]
+
+  hyperlinks: [Hyperlink]
+}
+
+input ReplyCountExpr {
+  LT: Int
+  GT: Int
+  EQ: Int
+}
+
+type ReplyRequest {
+  id: String
+  userId: String
+  appId: String
+  reason: String
+  feedbackCount: Int
+  positiveFeedbackCount: Int
+  negativeFeedbackCount: Int
+  createdAt: String
+  updatedAt: String
+
+  ownVote: FeedbackVote
+}
+
+enum ReplyTypeEnum {
+  RUMOR
+
+  NOT_RUMOR
+
+  NOT_ARTICLE
+
+  OPINIONATED
+}
+
+enum SortOrderEnum {
+  ASC
+  DESC
+}
+
+type User {
+  id: String
+
+  email: String
+  name: String
+  avatarUrl: String
+
+  facebookId: String
+
+
+  twitterId: String
+
+  repliedArticleCount: Int
+  level: Int
+
+  points: PointInfo
+  createdAt: String
+  updatedAt: String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
