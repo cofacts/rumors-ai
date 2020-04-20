@@ -1,6 +1,23 @@
 # rumors-ai
 Article categorizer for cofacts.
 
+## Repo structures
+    .
+    ├── data                          # Store untagged articles
+    ├── data_exploration              # Flow labeled data exploration results
+    ├── data_manager                  # Data manager for synchronizing articles
+    ├── ai_model                      # ML model pipelines
+    │     ├── data                    # Data for traning ML models
+    │     │     ├── raw_data          # Labeled raw data (by Flow or Cofacts)
+    │     │     └── processed_data    # Data after preprocessing (feed to ML models)
+    │     ├── preprocess              # Preprocess programs
+    │     ├── models                  # ML models
+    │     │     ├── model_A           # ML model developed by gary9630
+    │     │     └── model_B           # ML model developed by darkbtf
+    │     └── eval                    # Model evaluation programs for fair comparison
+    └── result                        # Store tagged articles
+
+
 ## Install
 This project uses python 3.7 and docker (docker-compose).
 
