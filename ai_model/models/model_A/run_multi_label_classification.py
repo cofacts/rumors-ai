@@ -230,43 +230,46 @@ def main():
     # Evaluation
     results = {}
     if training_args.do_eval and training_args.local_rank in [-1, 0]:
-        logger.info("*** Evaluate ***")
+
 
         if training_args.do_train:
-
-            result = trainer.evaluate
-
-            output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
-            with open(output_eval_file, "w") as writer:
-                logger.info("***** Eval results *****")
-                for key, value in result.items():
-                    logger.info("  %s = %s", key, value)
-                    writer.write("%s = %s\n" % (key, value))
-
-                results.update(result)
+            inference_task_name = 'Evaluate'
+            # result = trainer.evaluate
+            #
+            # output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
+            # with open(output_eval_file, "w") as writer:
+            #     logger.info("***** Eval results *****")
+            #     for key, value in result.items():
+            #         logger.info("  %s = %s", key, value)
+            #         writer.write("%s = %s\n" % (key, value))
+            #
+            #     results.update(result)
 
         else:
+            inference_task_name = 'Predict'
 
-            preds  = trainer.predict(eval_dataset)
+        logger.info("*** %s ***", inference_task_name)
 
-            result = preds.metrics
-            #logger.info(str(preds.predictions.shape))
-            # shape = (num_examples, num_labels)
-            detailed_result = [ list(preds.predictions.argmax(axis=1)), list(preds.label_ids) ]
+        preds = trainer.predict(eval_dataset)
 
-            output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
-            with open(output_eval_file, "w") as writer:
-                logger.info("***** Eval results *****")
-                for key, value in result.items():
-                    logger.info("  %s = %s", key, value)
-                    writer.write("%s = %s\n" % (key, value))
+        result = preds.metrics
+        #logger.info(str(preds.predictions.shape))
+        # shape = (num_examples, num_labels)
+        detailed_result = [ list(preds.predictions.argmax(axis=1)), list(preds.label_ids) ]
 
-                results.update(result)
+        output_eval_file = os.path.join(training_args.output_dir, inference_task_name+"_results.txt")
+        with open(output_eval_file, "w") as writer:
+            logger.info("***** %s results *****", inference_task_name)
+            for key, value in result.items():
+                logger.info("  %s = %s", key, value)
+                writer.write("%s = %s\n" % (key, value))
 
-                writer.write("========================\n")
+            results.update(result)
 
-                for i in range(len(detailed_result[0])):
-                    writer.write("Example #%d: Label: %s ; Prediction: %s\n" % (i+1, detailed_result[1][i], detailed_result[0][i]))
+            writer.write("========================\n")
+
+            for i in range(len(detailed_result[0])):
+                writer.write("Example #%d: Label: %s ; Prediction: %s\n" % (i+1, detailed_result[1][i], detailed_result[0][i]))
 
 
     return results
