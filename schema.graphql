@@ -328,7 +328,7 @@ type Mutation {
 
   CreateArticleReply(articleId: String!, replyId: String!): [ArticleReply]
 
-  CreateArticleCategory(articleId: String!, categoryId: String!): [ArticleCategory]
+  CreateArticleCategory(articleId: String!, categoryId: String!, aiModel: String, aiConfidence: Float): [ArticleCategory]
 
   CreateReplyRequest(
     articleId: String!
