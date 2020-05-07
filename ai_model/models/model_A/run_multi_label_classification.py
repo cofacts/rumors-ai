@@ -234,16 +234,6 @@ def main():
 
         if training_args.do_train:
             inference_task_name = 'Evaluate'
-            # result = trainer.evaluate
-            #
-            # output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
-            # with open(output_eval_file, "w") as writer:
-            #     logger.info("***** Eval results *****")
-            #     for key, value in result.items():
-            #         logger.info("  %s = %s", key, value)
-            #         writer.write("%s = %s\n" % (key, value))
-            #
-            #     results.update(result)
 
         else:
             inference_task_name = 'Predict'
@@ -253,7 +243,7 @@ def main():
         preds = trainer.predict(eval_dataset)
 
         result = preds.metrics
-        #logger.info(str(preds.predictions.shape))
+        
         # shape = (num_examples, num_labels)
         detailed_result = [ list(preds.predictions.argmax(axis=1)), list(preds.label_ids) ]
 

@@ -51,10 +51,7 @@ class InputExample:
     """
 
     example_id: str
-    #question: str
-    #contexts: List[str]
     contexts: str
-    #endings: List[str]
     label: Optional[str]
 
 
@@ -76,9 +73,6 @@ class InputFeatures:
     """
 
     example_id: str
-    # input_ids: List[List[int]]
-    # attention_mask: Optional[List[List[int]]]
-    # token_type_ids: Optional[List[List[int]]]
     input_ids: List[int]
     attention_mask: Optional[List[int]]
     label: Optional[int]
@@ -188,10 +182,7 @@ class CofactsProcessor(DataProcessor):
     def get_test_examples(self, data_dir):
         """See base class."""
         logger.info("LOOKING AT {} test".format(data_dir))
-        # raise ValueError(
-        #     "For Cofacts testing, the input file does not contain a label column. It can not be tested in current code"
-        #     "setting!"
-        # )
+
         return self._create_examples(self._read_csv(os.path.join(data_dir, "test.csv")), "test")
 
     def get_labels(self):
@@ -255,33 +246,12 @@ def convert_examples_to_features(
                 "you need to try to use a bigger max seq length!"
             )
 
-        # choices_inputs = []
-        # for context in enumerate(example.contexts):
-        #     text_a = context
-        #
-        #     # inputs = tokenizer.encode_plus(
-        #     #     text_a, text_b, add_special_tokens=True, max_length=max_length, pad_to_max_length=True,
-        #     # )
-        #     inputs = tokenizer.encode_plus(
-        #         text_a, add_special_tokens=True, max_length=max_length, pad_to_max_length=True,
-        #     )
-        #
-        #     if "num_truncated_tokens" in inputs and inputs["num_truncated_tokens"] > 0:
-        #         logger.info(
-        #             "Attention! you are cropping tokens (swag task is ok). "
-        #             "If you are training ARC and RACE and you are poping question + options,"
-        #             "you need to try to use a bigger max seq length!"
-        #         )
-        #
-        #     choices_inputs.append(inputs)
 
         label = label_map[example.label]
 
         input_ids = inputs["input_ids"]
         attention_mask = inputs["attention_mask"]
-        # token_type_ids = (
-        #     [x["token_type_ids"] for x in choices_inputs] if "token_type_ids" in choices_inputs[0] else None
-        # )
+
 
         features.append(
             InputFeatures(
