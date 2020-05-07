@@ -29,5 +29,17 @@ def sync_in():
 
 @app.route('/run_model')
 def run_model():
-  pass
+  if len(redis_client.lrange('jobs', 0, -1)) < 1:
+    redis_client.lpush('jobs', 'model.bert')
+
+  return '''
+    Current Job: {}
+    Current Queue: {}
+    Last Updated: {}
+  '''.format(
+    redis_client.get('current'),
+    redis_client.lrange('jobs', 0, -1),
+    data_manager.last_updated
+  )
+
 
