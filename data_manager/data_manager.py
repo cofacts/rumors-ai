@@ -165,8 +165,6 @@ class DataManager:
 
         categories = list(map(lambda element: element['category']['id'], article['articleCategories']))
 
-
-
         labels = model_result[article_id]
 
         for label in labels:
