@@ -4,7 +4,9 @@ This model is based on [BERT](https://github.com/google-research/bert) and imple
 
 Documents of Transformers can be found [HERE](https://huggingface.co/transformers/index.html).
 
-For the Quick Start guide, please check the jupyter notebook demo(**TBA**).
+For the Quick Start guide, please check the [jupyter notebook demo](https://github.com/cofacts/rumors-ai/blob/master/ai_model/models/model_A/Multi_class_classification_for_Cofacts_article_using_BERT.ipynb).
+
+If you prefer to run the model on Colab, we also provide the Colab link: https://colab.research.google.com/drive/1gAtSLQEwUdkFIs24Z8ARDfW664xIAmQh?usp=sharing
 
 
 ## Installation
@@ -62,7 +64,7 @@ The default dataset split ratio is **0.7/0.1/0.2**.
 If you want to a different split ratio, please modify [transform_json_to_csv.py](https://github.com/cofacts/rumors-ai/blob/master/ai_model/preprocess/transform_json_to_csv.py) directly.
 
 
-## Ruuning the model
+## Runing the model
 
 You can directly run the model training or prediction using [run_multi_label_classification.py](https://github.com/cofacts/rumors-ai/blob/master/ai_model/models/model_A/run_multi_label_classification.py) with different arguments.
 
@@ -90,7 +92,8 @@ python ./run_multi_label_classification.py \
 
 This is the fine-tuned training task start from Google's default pretrained [bert-base-chinese model](https://github.com/google-research/bert/blob/master/multilingual.md).
 
-The training time takes around **15 mins** on **single T4 GPU** machine (Colab default).
+The training time takes around **20 mins** on **single T4 GPU** machine (Colab default).
+
 ![training_time](./img/training_time.png)
 
 Training with the **defined hyper-parameters** yields the following results:
