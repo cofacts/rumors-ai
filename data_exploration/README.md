@@ -7,7 +7,7 @@ There are 3 time-consecutive labeled data provided by Flow:
 
 Total labeled articles are 14,908.
 
-This notebook is for data exploration and provided some insights of these labeled data.
+This [notebook](https://github.com/cofacts/rumors-ai/blob/master/data_exploration/EDA.ipynb) is for data exploration and provided some insights of these labeled data.
 
 ## Cofacts pre-defined article classes
 
@@ -55,3 +55,22 @@ From above table, we can know that:
 In order to verify Flow labels quality, we are doing eyeball check on 3,000 randomly selected articles.
 
 For the verification report, you can check it out at: **TBC**
+
+
+# Cofacts articles trending keywords extraction
+
+This [notebook](https://github.com/cofacts/rumors-ai/blob/master/data_exploration/Keywords.ipynb) is for articles trending keywords extraction.
+
+To inspect what topics are hot in a given period of time, the first step is to extract the keywords within that time period.
+
+Here, we demonstrate trending keywords extraction using [jieba](https://github.com/fxsjy/jieba).
+
+We set the interested date = **2017-01-01**, and extract keywords from 1, 3, 7, and 30 days ago.
+
+## Keywords (2017-01-01)
+
+### 1 day & 3 days
+![2017-01-01-1d](./img/2017-01-01-1d.png) ![2017-01-01-3d](./img/2017-01-01-3d.png)
+
+### 7 days & 30 days
+![2017-01-01-7d](./img/2017-01-01-7d.png) ![2017-01-01-30d](./img/2017-01-01-30d.png)
