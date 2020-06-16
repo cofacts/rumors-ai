@@ -1,12 +1,15 @@
-from flask import Flask
+from flask import Flask, request
 from data_manager import DataManager
 from ai import ModelManager
 import redis
+import json
 import schedule
 import time
+from pymongo import MongoClient
 
 app = Flask(__name__)
 
+client = MongoClient('localhost', 27017)
 redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 data_manager = DataManager()
@@ -80,3 +83,33 @@ def run_model():
   push_job('predict.bert')
 
   return get_status()
+
+# GET /v1/models/
+@app.route('/v1/models', methods=['GET'])
+def get_model():
+  return client.models.find()
+
+# POST /v1/models/
+@app.route('/v1/models', methods=['POST'])
+def post_model():
+  return client.models.insert_one(json.loads(request.get_json()))
+
+# POST /v1/categorize/
+@app.route('/v1/categorize', methods=['POST'])
+def post_category():
+  return {
+    "id": "this-is-mongo-object-id",
+    "name": "my ai model",
+    "apiKey": "zzzzzz",
+    "createdAt": "2020-06-03"
+  }
+
+# GET /v1/keyword/
+@app.route('/v1/keyword/', methods=['POST'])
+def get_keyword():
+  return {
+    "id": "this-is-mongo-object-id",
+    "name": "my ai model",
+    "apiKey": "zzzzzz",
+    "createdAt": "2020-06-03"
+  }
