@@ -3,10 +3,16 @@ from graphql import build_ast_schema, parse
 import os
 import datetime
 import pickle
+import traceback
+import time
 
 from gql.transport.requests import RequestsHTTPTransport
 
-COFACTS_GRAPHQL_SERVER = 'https://cofacts-api.hacktabl.org/graphql'
+COFACTS_GRAPHQL_SERVER = {
+  'staging': 'https://cofacts-api.hacktabl.org/graphql',
+  'production': 'https://cofacts-api.g0v.tw/graphql'
+}
+ENV = 'production'
 
 CATEGORY_ID_MAPPING = [
   'kj287XEBrIRcahlYvQoS', # 0 中國影響力
@@ -31,7 +37,7 @@ CATEGORY_ID_MAPPING = [
 class DataManager:
   def __init__(self):
     transport=RequestsHTTPTransport(
-      url=COFACTS_GRAPHQL_SERVER+'?userId=bert',
+      url=COFACTS_GRAPHQL_SERVER[ENV]+'?userId=bert',
       use_json=True,
       headers={
           "Content-type": "application/json",
@@ -44,22 +50,21 @@ class DataManager:
 
     self.client = Client(schema=schema, transport=transport)
 
-    article_list_files = sorted(os.listdir('./data/article_list'))
+    article_list_files = sorted(os.listdir('./data/{}/article_list'.format(ENV)))
 
-    latest_article_list_filename = None if len(article_list_files) == 0 else article_list_files[-1]
+    if len(article_list_files) > 0:
+      latest_article_list_filename = article_list_files[-1]
 
-    self.last_updated = latest_article_list_filename[:-4]
+      self.last_updated = latest_article_list_filename[:-4]
 
-    self.article_list = pickle.load(open('./data/article_list/{}'.format(latest_article_list_filename), 'rb'))
+      self.article_list = pickle.load(open('./data/{}/article_list/{}'.format(ENV, latest_article_list_filename), 'rb'))
 
-    article_files = os.listdir('./data/articles')
+      article_files = os.listdir('./data/{}/articles'.format(ENV))
 
     self.articles = {}
 
-    print(article_files)
-
     # for article_file in article_files:
-    #   article = pickle.load(open('./data/articles/{}'.format(article_file), 'rb'))
+    #   article = pickle.load(open('./data/{}/articles/{}'.format(ENV, article_file), 'rb'))
     #   self.articles[article['id']] = article
 
     self.models = {}
@@ -103,11 +108,13 @@ class DataManager:
       cursor = edges[-1]['cursor']
 
     current_date_string = datetime.datetime.now().strftime('%Y%m%d')
-    pickle.dump(self.article_list, open('./data/article_list/{}.pkl'.format(current_date_string), 'wb'))
+    pickle.dump(self.article_list, open('./data/{}/article_list/{}.pkl'.format(ENV, current_date_string), 'wb'))
 
   def update_articles(self):
-    for article_id in self.article_list:
+    print('fuck')
+    for i, article_id in enumerate(self.article_list):
       if article_id not in self.articles:
+        print(i)
         query_string = '''
           {{
             GetArticle(
@@ -140,18 +147,18 @@ class DataManager:
 
         self.articles[article_id] = result
 
-        pickle.dump(result, open('./data/articles/{}.pkl'.format(article_id), 'wb'))
+        pickle.dump(result, open('./data/{}/articles/{}.pkl'.format(ENV, article_id), 'wb'))
 
   def sync_in(self):
     self.update_article_list()
     self.update_articles()
 
   def write_labels(self):
-    files = list(os.listdir('./result'))
+    files = list(os.listdir('./result/{}'.format(ENV)))
 
     latest_result = sorted(files, reverse=True)[0]
 
-    results = pickle.load(open('./result/{}'.format(latest_result), 'rb'))
+    results = pickle.load(open('./result/{}/{}'.format(ENV, latest_result), 'rb'))
     
     for model_name in results.keys():
       model_result = results[model_name]
@@ -159,10 +166,8 @@ class DataManager:
 
       for article_id in model_result.keys():
         
-        article = pickle.load(open('./data/articles/{}.pkl'.format(article_id), 'rb'))
+        article = pickle.load(open('./data/{}/articles/{}.pkl'.format(ENV, article_id), 'rb'))
         
-        print(article)
-
         categories = list(map(lambda element: element['category']['id'], article['articleCategories']))
 
         labels = model_result[article_id]
@@ -174,6 +179,8 @@ class DataManager:
                 CreateArticleCategory(
                   articleId: "{}"
                   categoryId: "{}"
+                  aiModel: "{}"
+                  aiConfidence: {}
                 ) {{
                   articleId
                   categoryId
@@ -181,11 +188,16 @@ class DataManager:
               }}
             '''.format(article_id, CATEGORY_ID_MAPPING[label[0]], model_name, label[1])
 
-            print(query_string)
-
             query = gql(query_string)
+            # self.client.execute(query)
 
-            self.client.execute(query)
+            time.sleep(10)
+
+            try:
+              self.client.execute(query)
+            except Exception:
+              print(traceback.format_exc())
+              print(query_string)
     
     return
 
