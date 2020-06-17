@@ -151,7 +151,7 @@ def post_category():
                 'pending': True
             }
         else:
-            result['result']['useModels'][model_id] = local_model.predict(
+            result['result']['useModels'][model_id] = local_model.predict_text(
                 content)
 
     return result

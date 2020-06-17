@@ -64,3 +64,20 @@ This project has been tested on GCP n1-standard VM
   * article list: `data/article_list/<date>.pkl`
   * articles: `data/articles/<article_id>.pkl`.
 <img src="https://i.imgur.com/ERoYmoP.png" width="720" />
+
+## Notes
+### Artlcle Format
+<TODO>
+
+### Result Format
+```
+{
+  [model_name]: {
+    [article_id]: [
+      (category_id, confidence)
+    ]
+  }
+}
+```
+
+## 
