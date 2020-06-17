@@ -97,14 +97,14 @@ def run_model():
 
 @app.route('/v1/models', methods=['GET'])
 def get_model():
-    return client.models.find()
+    return db_client.models.find()
 
 # POST /v1/models/
 
 
 @app.route('/v1/models', methods=['POST'])
 def post_model():
-    return client.models.insert_one(json.loads(request.get_json()))
+    return db_client.models.insert_one(json.loads(request.get_json()))
 
 # POST /v1/categorize/
 
