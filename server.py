@@ -9,7 +9,8 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 
-client = MongoClient('localhost', 27017)
+client = MongoClient(
+    'mongodb://rumors:rumors1234@ds363088.mlab.com:63088/rumors-ai', 63088)
 db_client = client['rumors-ai']
 redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
@@ -122,6 +123,7 @@ input:
 
 @app.route('/v1/categorize', methods=['POST'])
 def post_category():
+
     content = request.json['content']
     models = request.json['useModels']
     source = request.json['source']
@@ -137,7 +139,6 @@ def post_category():
 
     for model_id in models:
         local_model = model_manager.get_model(model_id)
-
         if local_model is None:
 
             db_client.tasks.insert_one({
@@ -162,19 +163,26 @@ def post_category():
 @app.route('/v1/keyword/<date_string>', methods=['GET'])
 def get_keyword(date_string):
     keyword_stats = db_client.keyword_stats.find_one({'date': date_string})
-    return keyword_stats
+
+    return {
+        'date': keyword_stats['date'],
+        '1d': json.loads(keyword_stats['1d']),
+        '3d': json.loads(keyword_stats['3d']),
+        '7d': json.loads(keyword_stats['7d']),
+        '30d': json.loads(keyword_stats['30d']),
+    }
 
 # GET /v1/tasks/${modelId}
 
 
-@app.route('/v1/tasks/<model_id>', methods=['GET'])
+@ app.route('/v1/tasks/<model_id>', methods=['GET'])
 def get_tasks_by_model(model_id):
     return db_client.tasks.find({'modelId': model_id})
 
 # POST /v1/tasks/${taskId}
 
 
-@app.route('/v1/tasks/<task_id>', methods=['POST'])
+@ app.route('/v1/tasks/<task_id>', methods=['POST'])
 def finish_task(task_id):
 
     task = db_client.tasks.find_one({'id': task_id})
@@ -184,6 +192,6 @@ def finish_task(task_id):
     db_client.tasks.delete_one({'id': task_id})
 
     # TODO: send result to callback endpoint
-    # request.post(callback_url, request.json)
+    # request.post(callback_url, request.body)
 
-    return request.post(callback_url, request.json)
+    return
