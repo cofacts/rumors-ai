@@ -1,6 +1,5 @@
 from data_manager import DataManager
 from ai.models.bow import BowModel
-# from preprocess import 
 
 class Model:
 	def __init__(self):
@@ -27,12 +26,14 @@ class ModelManager:
 	def get_model(self, model_name):
 		try:
 			if model_name == 'bow':
+				print('get', model_name)
 				if model_name not in self.models:
+					print(BowModel())
 					self.models[model_name] = BowModel()
 				return self.models[model_name]
 		except:
 			print('Model named {} not found.'.format(model_name))
-		
+			BowModel()
 		return None
 		
 

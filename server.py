@@ -122,11 +122,10 @@ input:
 
 @app.route('/v1/categorize', methods=['POST'])
 def post_category():
-
-    content = request.body['content']
-    models = request.body['useModels']
-    source = request.body['source']
-    callback = request.body['callback']
+    content = request.json['content']
+    models = request.json['useModels']
+    source = request.json['source']
+    callback = request.json['callback']
 
     result = {
         'result': {
@@ -138,6 +137,7 @@ def post_category():
 
     for model_id in models:
         local_model = model_manager.get_model(model_id)
+
         if local_model is None:
 
             db_client.tasks.insert_one({
@@ -184,6 +184,6 @@ def finish_task(task_id):
     db_client.tasks.delete_one({'id': task_id})
 
     # TODO: send result to callback endpoint
-    # request.post(callback_url, request.body)
+    # request.post(callback_url, request.json)
 
-    return request.post(callback_url, request.body)
+    return request.post(callback_url, request.json)
