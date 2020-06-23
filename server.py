@@ -5,9 +5,12 @@ import redis
 import json
 import schedule
 import time
+import settings
 from pymongo import MongoClient
 
 app = Flask(__name__)
+
+mongodb_url = settings.MONGODB_ADDRESS
 
 client = MongoClient(
     'mongodb://rumors:rumors1234@ds363088.mlab.com:63088/rumors-ai', 63088)
