@@ -10,12 +10,11 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 
-mongodb_url = settings.MONGODB_ADDRESS
-
 client = MongoClient(
-    'mongodb://rumors:rumors1234@ds363088.mlab.com:63088/rumors-ai', 63088)
+    settings.MONGODB_ADDRESS, settings.MONGODB_PORT)
+
 db_client = client['rumors-ai']
-redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=True)
 
 data_manager = DataManager()
 model_manager = ModelManager()
@@ -63,7 +62,7 @@ def push_job(job_string):
 
 schedule.every().minute.do(process_queue)
 schedule.every().day.at('02:30').do(push_job('sync_in'))
-schedule.every().day.at('02:45').do(push_job('predict.bert'))
+schedule.every().day.at('02:45').do(push_job('predict.bow'))
 schedule.every().day.at('03:00').do(push_job('sync_out'))
 
 
@@ -91,7 +90,7 @@ def sync_in():
 
 @app.route('/run_model')
 def run_model():
-    push_job('predict.bert')
+    push_job('predict.bow')
 
     return get_status()
 

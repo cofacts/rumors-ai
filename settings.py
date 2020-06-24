@@ -4,5 +4,7 @@ import os
 load_dotenv()
 
 ENV = os.getenv('ENV')
-REDIS_ADDRESS = os.getenv('REDIS_ADDRESS')
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
 MONGODB_ADDRESS = os.getenv('MONGODB_ADDRESS')
+MONGODB_PORT = os.getenv('MONGODB_PORT')
