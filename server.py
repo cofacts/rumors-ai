@@ -6,19 +6,19 @@ import json
 import schedule
 import time
 import settings
+from jobs import keyword_analysis
 from pymongo import MongoClient
 
 app = Flask(__name__)
 
 client = MongoClient(
-    settings.MONGODB_ADDRESS, settings.MONGODB_PORT)
+    settings.MONGODB_ADDRESS, int(settings.MONGODB_PORT))
 
 db_client = client['rumors-ai']
 redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=True)
 
 data_manager = DataManager()
 model_manager = ModelManager()
-
 
 def process_queue():
     global redis_client
@@ -43,6 +43,8 @@ def process_queue():
             elif current_job == 'predict':
                 model_name = parameters[0]
                 model_manager.get_model(model_name).predict()
+            elif current_job == 'keyword':
+                keyword_analysis(data_manager)
             else:
                 print('Unknown job:', current_job)
 
