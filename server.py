@@ -196,7 +196,12 @@ def finish_task(task_id):
 
     db_client.tasks.delete_one({'id': task_id})
 
-    # TODO: send result to callback endpoint
-    # request.post(callback_url, request.body)
+    result = request.post(callback_url, data=json.loads(request.get_json()))
 
-    return
+    if result.status_code != 200:
+        print('callback failed')
+
+    return {
+        'ok': True,
+        
+    }
