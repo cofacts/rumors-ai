@@ -64,8 +64,9 @@ def push_job(job_string):
 
 schedule.every().minute.do(process_queue)
 schedule.every().day.at('02:30').do(push_job('sync_in'))
-schedule.every().day.at('02:45').do(push_job('predict.bow'))
-schedule.every().day.at('03:00').do(push_job('sync_out'))
+schedule.every().day.at('02:45').do(push_job('keyword'))
+schedule.every().day.at('03:00').do(push_job('predict.bow'))
+schedule.every().day.at('03:30').do(push_job('sync_out'))
 
 
 def get_status():
