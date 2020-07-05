@@ -8,6 +8,7 @@ import time
 import settings
 from jobs import keyword_analysis
 from pymongo import MongoClient
+from secrets import token_urlsafe
 
 app = Flask(__name__)
 
@@ -19,6 +20,11 @@ redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, d
 
 data_manager = DataManager()
 model_manager = ModelManager()
+
+def remove_object_id(object):
+    object['id'] = str(object['_id'])
+    object.pop('_id', None)
+    return object
 
 def process_queue():
     global redis_client
@@ -98,18 +104,23 @@ def run_model():
     return get_status()
 
 # GET /v1/models/
-
-
 @app.route('/v1/models', methods=['GET'])
 def get_model():
-    return db_client.models.find()
+    return {
+        'result': list(map(remove_object_id, list(db_client.models.find())))
+    }
 
 # POST /v1/models/
-
-
 @app.route('/v1/models', methods=['POST'])
 def post_model():
-    return db_client.models.insert_one(json.loads(request.get_json()))
+    model_info = request.get_json()
+
+    model_info['apiKey'] = token_urlsafe(32)
+    model_info['approved'] = False
+
+    db_client.models.insert_one(model_info)
+
+    return remove_object_id(model_info)
 
 # POST /v1/categorize/
 
@@ -203,5 +214,4 @@ def finish_task(task_id):
 
     return {
         'ok': True,
-        
     }
