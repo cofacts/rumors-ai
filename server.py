@@ -191,8 +191,9 @@ def get_keyword(date_string):
 # GET /v1/tasks/${modelId}
 
 
-@ app.route('/v1/tasks/<model_id>', methods=['GET'])
-def get_tasks_by_model(model_id):
+@ app.route('/v1/tasks', methods=['GET'])
+def get_tasks_by_model():
+    model_id = request.args.get('modelId')
     return json.dumps(list(map(remove_object_id, list(db_client.tasks.find({'modelId': model_id})))), indent=2, ensure_ascii=False)
 
 # POST /v1/tasks/${taskId}
