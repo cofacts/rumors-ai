@@ -15,7 +15,7 @@ app = Flask(__name__)
 client = MongoClient(
     settings.MONGODB_ADDRESS, int(settings.MONGODB_PORT))
 
-db_client = client['rumors-ai']
+db_client = client[settings.MONGODB_NAME]
 redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=True)
 
 data_manager = DataManager()
@@ -193,7 +193,7 @@ def get_keyword(date_string):
 
 @ app.route('/v1/tasks/<model_id>', methods=['GET'])
 def get_tasks_by_model(model_id):
-    return db_client.tasks.find({'modelId': model_id})
+    return json.dumps(list(map(remove_object_id, list(db_client.tasks.find({'modelId': model_id})))), indent=2, ensure_ascii=False)
 
 # POST /v1/tasks/${taskId}
 
