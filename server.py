@@ -9,6 +9,7 @@ import settings
 from jobs import keyword_analysis
 from pymongo import MongoClient
 from secrets import token_urlsafe
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 
@@ -194,25 +195,31 @@ def get_keyword(date_string):
 @ app.route('/v1/tasks', methods=['GET'])
 def get_tasks_by_model():
     model_id = request.args.get('modelId')
-    return json.dumps(list(map(remove_object_id, list(db_client.tasks.find({'modelId': model_id})))), indent=2, ensure_ascii=False)
+    return json.dumps(list(map(remove_object_id, list(db_client.tasks.find({'modelId': model_id, 'result': { '$exists': False }})))), indent=2, ensure_ascii=False)
 
 # POST /v1/tasks/${taskId}
 
 
-@ app.route('/v1/tasks/<task_id>', methods=['POST'])
-def finish_task(task_id):
+@ app.route('/v1/tasks', methods=['POST'])
+def finish_task():
 
-    task = db_client.tasks.find_one({'id': task_id})
+    res = []
 
-    callback_url = task['callback']
+    for task in request.json:
+        update_result = db_client.tasks.update_one({ '_id': ObjectId(task['id']) }, {'$set': { 'result': task['result']}}, upsert=False)
+        print(update_result)
+        res.append({
+            'id': task['id'],
+            'result': {
+                'ok': True
+            }
+        })
 
-    db_client.tasks.delete_one({'id': task_id})
+    # result = request.post(callback_url, data=json.loads(request.get_json()))
 
-    result = request.post(callback_url, data=json.loads(request.get_json()))
-
-    if result.status_code != 200:
-        print('callback failed')
+    # if result.status_code != 200:
+    #     print('callback failed')
 
     return {
-        'ok': True,
+        'result': res
     }
