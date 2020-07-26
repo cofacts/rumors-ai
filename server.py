@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from data_manager import DataManager
 from ai import ModelManager
 import redis
@@ -6,6 +6,7 @@ import json
 import schedule
 import time
 import settings
+import threading
 from jobs import keyword_analysis
 from pymongo import MongoClient
 from secrets import token_urlsafe
@@ -30,12 +31,20 @@ def remove_object_id(object):
 def process_queue():
     global redis_client
 
+    print('process lah')
+
     if redis_client.get('current') == None:
         job_list = redis_client.lrange('jobs', 0, -1)
 
         if len(job_list) > 0:
             current_job_str = redis_client.lpop('jobs')
             redis_client.set('current', current_job_str)
+            
+            db_client.jobs.insert_one({
+                'instance': settings.INSTANCE_NAME,
+                'job': current_job_str
+            })
+
             job_strs = current_job_str.split('.')
 
             current_job = job_strs[0]
@@ -75,6 +84,18 @@ schedule.every().day.at('02:45').do(push_job('keyword'))
 schedule.every().day.at('03:00').do(push_job('predict.bow'))
 schedule.every().day.at('03:30').do(push_job('sync_out'))
 
+cease_continuous_run = threading.Event()
+
+class ScheduleThread(threading.Thread):
+    @classmethod
+    def run(cls):
+        while not cease_continuous_run.is_set():
+            print('run ni ma')
+            schedule.run_pending()
+            time.sleep(5)
+
+continuous_thread = ScheduleThread()
+continuous_thread.start()
 
 def get_status():
     return '''
@@ -220,6 +241,4 @@ def finish_task():
     # if result.status_code != 200:
     #     print('callback failed')
 
-    return {
-        'result': res
-    }
+    return jsonify(res)
