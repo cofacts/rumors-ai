@@ -15,7 +15,8 @@ Article categorizer for cofacts.
     │     │     ├── model_A           # ML model developed by gary9630
     │     │     └── model_B           # ML model developed by darkbtf
     │     └── eval                    # Model evaluation programs for fair comparison
-    └── result                        # Store tagged articles
+    ├── result                        # Store tagged articles
+    └── .env                          # Environment variables (see ## Configuration)
 
 
 ## Install
@@ -80,4 +81,16 @@ This project has been tested on GCP n1-standard VM
 }
 ```
 
-## 
+## Environment Variables
+see [.env.example](.env.example)
+
+| Environment Variable | Description |
+| -------- | -------- |
+| ENV     | environment. default: `development` |
+| INSTANCE_NAME     | Instance name used for logging. default: `development`     |
+| REDIS_HOST     | host of Redis. default: `localhost`     |
+| REDIS_PORT     | port of Redis. default: `6379`     |
+| MONGODB_ADDRESS     | address of MongoDB. default: `localhost`     |
+| MONGODB_PORT     | port of MongoDB. default: `27017`     |
+| MONGODB_NAME     | name of MongoDB database . default: `rumors-ai`     |
+
