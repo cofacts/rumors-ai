@@ -218,7 +218,10 @@ def get_keyword(date_string):
 @ app.route('/v1/tasks', methods=['GET'])
 def get_tasks_by_model():
     model_id = request.args.get('modelId')
-    return json.dumps(list(map(remove_object_id, list(db_client.tasks.find({'modelId': model_id, 'result': {'$exists': False}})))), indent=2, ensure_ascii=False)
+    criteria = {'modelId': model_id}
+    if request.args.get('test') is None:
+        criteria['result'] = {'$exists': False}
+    return json.dumps(list(map(remove_object_id, list(db_client.tasks.find(criteria)))), indent=2, ensure_ascii=False)
 
 # POST /v1/tasks/${taskId}
 
