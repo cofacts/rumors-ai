@@ -18,15 +18,18 @@ client = MongoClient(
     settings.MONGODB_ADDRESS, int(settings.MONGODB_PORT))
 
 db_client = client[settings.MONGODB_NAME]
-redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=True)
+redis_client = redis.Redis(host=settings.REDIS_HOST,
+                           port=settings.REDIS_PORT, decode_responses=True)
 
 data_manager = DataManager()
 model_manager = ModelManager()
+
 
 def remove_object_id(object):
     object['id'] = str(object['_id'])
     object.pop('_id', None)
     return object
+
 
 def process_queue():
     global redis_client
@@ -39,7 +42,7 @@ def process_queue():
         if len(job_list) > 0:
             current_job_str = redis_client.lpop('jobs')
             redis_client.set('current', current_job_str)
-            
+
             db_client.jobs.insert_one({
                 'instance': settings.INSTANCE_NAME,
                 'job': current_job_str
@@ -86,6 +89,7 @@ schedule.every().day.at('03:30').do(push_job('sync_out'))
 
 cease_continuous_run = threading.Event()
 
+
 class ScheduleThread(threading.Thread):
     @classmethod
     def run(cls):
@@ -94,8 +98,10 @@ class ScheduleThread(threading.Thread):
             schedule.run_pending()
             time.sleep(5)
 
+
 continuous_thread = ScheduleThread()
 continuous_thread.start()
+
 
 def get_status():
     return '''
@@ -126,6 +132,8 @@ def run_model():
     return get_status()
 
 # GET /v1/models/
+
+
 @app.route('/v1/models', methods=['GET'])
 def get_model():
     return {
@@ -133,6 +141,8 @@ def get_model():
     }
 
 # POST /v1/models/
+
+
 @app.route('/v1/models', methods=['POST'])
 def post_model():
     model_info = request.get_json()
@@ -162,10 +172,10 @@ input:
 @app.route('/v1/categorize', methods=['POST'])
 def post_category():
 
-    content = request.json['content']
-    models = request.json['useModels']
-    source = request.json['source']
-    callback = request.json['callback']
+    content = request.json.get('content')
+    models = request.json.get('useModels')
+    source = request.json.get('source')
+    callback = request.json.get('callback')
 
     result = {
         'result': {
@@ -216,7 +226,7 @@ def get_keyword(date_string):
 @ app.route('/v1/tasks', methods=['GET'])
 def get_tasks_by_model():
     model_id = request.args.get('modelId')
-    return json.dumps(list(map(remove_object_id, list(db_client.tasks.find({'modelId': model_id, 'result': { '$exists': False }})))), indent=2, ensure_ascii=False)
+    return json.dumps(list(map(remove_object_id, list(db_client.tasks.find({'modelId': model_id, 'result': {'$exists': False}})))), indent=2, ensure_ascii=False)
 
 # POST /v1/tasks/${taskId}
 
@@ -227,7 +237,8 @@ def finish_task():
     res = []
 
     for task in request.json:
-        update_result = db_client.tasks.update_one({ '_id': ObjectId(task['id']) }, {'$set': { 'result': task['result']}}, upsert=False)
+        update_result = db_client.tasks.update_one({'_id': ObjectId(task['id'])}, {
+                                                   '$set': {'result': task['result']}}, upsert=False)
         print(update_result)
         res.append({
             'id': task['id'],
