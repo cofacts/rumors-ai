@@ -161,7 +161,7 @@ def post_model():
 input:
 {
     "content": "sample",
-    "useModels": [ "mid-A", "mid-B", "mid-C" ],
+    "useModel": "mid-A", "mid-B", "mid-C",
     "source": "LINE",
     "callback": "https://myapp.io/callback",
     "metedata": {},
@@ -173,35 +173,27 @@ input:
 def post_category():
 
     content = request.json.get('content')
-    models = request.json.get('useModels')
+    model = request.json.get('useModel')
     source = request.json.get('source')
     callback = request.json.get('callback')
 
-    result = {
-        'result': {
-            'useModels': {
+    result = {}
 
-            }
+    local_model = model_manager.get_model(model)
+    if local_model is None:
+
+        db_client.tasks.insert_one({
+            'modelId': model,
+            'content': content,
+            'source': source,
+            'callback': callback
+        })
+
+        result['result'] = {
+            'pending': True
         }
-    }
-
-    for model_id in models:
-        local_model = model_manager.get_model(model_id)
-        if local_model is None:
-
-            db_client.tasks.insert_one({
-                'modelId': model_id,
-                'content': content,
-                'source': source,
-                'callback': callback
-            })
-
-            result['result']['useModels'][model_id] = {
-                'pending': True
-            }
-        else:
-            result['result']['useModels'][model_id] = local_model.predict_text(
-                content)
+    else:
+        result['result'] = local_model.predict_text(content)
 
     return result
 
