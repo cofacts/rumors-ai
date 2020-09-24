@@ -90,7 +90,6 @@ class ScheduleThread(threading.Thread):
     @classmethod
     def run(cls):
         while not cease_continuous_run.is_set():
-            print('run ni ma')
             schedule.run_pending()
             time.sleep(5)
 
@@ -202,13 +201,15 @@ def post_category():
 def get_keyword(date_string):
     keyword_stats = db_client.keyword_stats.find_one({'date': date_string})
 
-    return {
+    entry = {} if keyword_stats is None else {
         'date': keyword_stats['date'],
         '1d': json.loads(keyword_stats['1d']),
         '3d': json.loads(keyword_stats['3d']),
         '7d': json.loads(keyword_stats['7d']),
         '30d': json.loads(keyword_stats['30d']),
     }
+
+    return entry
 
 # GET /v1/tasks/${modelId}
 
@@ -227,6 +228,9 @@ def finish_task():
     res = []
 
     for task in request.json:
+        if task['result'] is None:
+            # TODO: empty result
+            pass
         update_result = db_client.tasks.update_one({ '_id': ObjectId(task['id']) }, {'$set': { 'result': task['result']}}, upsert=False)
         print(update_result)
         res.append({
