@@ -19,3 +19,10 @@ class BowModel:
 		vectorized_text = self.vectorizer.transform(tokenized_text)
 
 		return list(map(int, self.classifier.predict(vectorized_text)))
+
+	def predict(self, articles):
+		tokenized_text = list(map(lambda article: ' '.join(jieba.cut(article['text'], cut_all=True)), articles))
+
+		vectorized_text = self.vectorizer.transform(tokenized_text)
+
+		return list(map(int, self.classifier.predict(vectorized_text)))
