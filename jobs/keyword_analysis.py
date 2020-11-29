@@ -6,13 +6,15 @@ from datetime import datetime, timedelta
 
 
 client = MongoClient(settings.MONGODB_ADDRESS, int(settings.MONGODB_PORT))
-db_client = client['rumors-ai']
+db_client = client[settings.MONGODB_NAME]
 
 MAX_KEYWORD_COUNT = 100
 TIME_WINDOWS = [1, 3, 7, 30]
 
 def keyword_analysis(data_manager):
-    latest_date = datetime.strptime(list(db_client.keyword_stats.find().sort([('date', -1)]).limit(1))[0]['date'], '%Y%m%d').date()
+    latest_stat = list(db_client.keyword_stats.find().sort([('date', -1)]).limit(1))
+
+    latest_date = datetime.strptime('20180101', '%Y%m%d').date() if len(latest_stat) == 0 else datetime.strptime(latest_stat[0]['date'], '%Y%m%d').date()
     
     date_i = latest_date + timedelta(days=1)
     current_date = datetime.today().date()
