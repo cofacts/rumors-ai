@@ -34,7 +34,7 @@ def remove_object_id(object):
 def process_queue():
     global redis_client
 
-    print('process lah')
+    print('processing', redis_client.get('current'))
 
     if redis_client.get('current') == None:
         job_list = redis_client.lrange('jobs', 0, -1)
@@ -43,31 +43,34 @@ def process_queue():
             current_job_str = redis_client.lpop('jobs')
             redis_client.set('current', current_job_str)
 
-            db_client.jobs.insert_one({
-                'instance': settings.INSTANCE_NAME,
-                'job': current_job_str
-            })
+    if redis_client.get('current') != None:
+        current_job_str = redis_client.get('current')
 
-            job_strs = current_job_str.split('.')
+        db_client.jobs.insert_one({
+            'instance': settings.INSTANCE_NAME,
+            'job': current_job_str
+        })
 
-            current_job = job_strs[0]
-            parameters = [] if len(job_strs) <= 1 else job_strs[1:]
+        job_strs = current_job_str.split('.')
 
-            if current_job == 'sync_in':
-                data_manager.sync_in()
-            elif current_job == 'sync_out':
-                data_manager.sync_out()
-            elif current_job == 'train':
-                print('Online training not implemented, please train models manually')
-            elif current_job == 'predict':
-                model_name = parameters[0]
-                model_manager.get_model(model_name).predict()
-            elif current_job == 'keyword':
-                keyword_analysis(data_manager)
-            else:
-                print('Unknown job:', current_job)
+        current_job = job_strs[0]
+        parameters = [] if len(job_strs) <= 1 else job_strs[1:]
 
-            redis_client.delete('current')
+        if current_job == 'sync_in':
+            data_manager.sync_in()
+        elif current_job == 'sync_out':
+            data_manager.sync_out()
+        elif current_job == 'train':
+            print('Online training not implemented, please train models manually')
+        elif current_job == 'predict':
+            model_name = parameters[0]
+            model_manager.get_model(model_name).predict()
+        elif current_job == 'keyword':
+            keyword_analysis(data_manager)
+        else:
+            print('Unknown job:', current_job)
+
+        redis_client.delete('current')
 
 
 def push_job(job_string):
