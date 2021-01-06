@@ -187,7 +187,15 @@ def patch_model(id):
     update_result = db_client.models.update_one({'_id': ObjectId(id)}, {
                                                 '$set': model_info}, upsert=False)
 
-    return jsonify(update_result)
+    # if update_result is failed:
+    # return { 'id': id, 'result': { 'ok': false }, 'error': '...' } }
+
+    return {
+        'id': id,
+        'result': {
+            'ok': True
+        }
+    }
 
 
 
