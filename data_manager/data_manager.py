@@ -41,7 +41,8 @@ class DataManager:
       use_json=True,
       headers={
           "Content-type": "application/json",
-          "x-app-secret": "rumors-ai"
+          "x-app-secret": "rumors-ai",
+          "x-accept-license": "https://github.com/cofacts/opendata#terms"
       },
       verify=False
     )
@@ -63,9 +64,9 @@ class DataManager:
 
     self.articles = {}
 
-    # for article_file in article_files:
-    #   article = pickle.load(open('./data/{}/articles/{}'.format(ENV, article_file), 'rb'))
-    #   self.articles[article['id']] = article
+    for article_file in article_files:
+      article = pickle.load(open('./data/{}/articles/{}'.format(ENV, article_file), 'rb'))
+      self.articles[article['id']] = article
 
     self.models = {}
 
@@ -114,7 +115,7 @@ class DataManager:
     print('fuck')
     for i, article_id in enumerate(self.article_list):
       if article_id not in self.articles:
-        print(i)
+        print(i, article_id)
         query_string = '''
           {{
             GetArticle(
