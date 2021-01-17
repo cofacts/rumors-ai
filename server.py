@@ -25,24 +25,25 @@ data_manager = DataManager()
 model_manager = ModelManager()
 
 DEFAULT_CATEGORY_MAPPING = {
-  0: 'kj287XEBrIRcahlYvQoS', # 中國影響力
-  1: 'kz3c7XEBrIRcahlYxAp6', # 性少數與愛滋病
-  2: 'lD3h7XEBrIRcahlYeQqS', # 女權與性別刻板印象
-  3: 'lT3h7XEBrIRcahlYugqq', # 保健秘訣、食品安全
-  4: 'lj2m7nEBrIRcahlY6Ao_', # 基本人權問題
-  5: 'lz2n7nEBrIRcahlYDgri', # 農林漁牧政策
-  6: 'mD2n7nEBrIRcahlYLAr7', # 能源轉型
-  7: 'mT2n7nEBrIRcahlYTArI', # 環境生態保護
-  8: 'mj2n7nEBrIRcahlYdArf', # 優惠措施、新法規、政策宣導
-  9: 'mz2n7nEBrIRcahlYnQpz', # 科技、資安、隱私
-  10: 'nD2n7nEBrIRcahlYwQoW', # 免費訊息詐騙
-  11: 'nT2n7nEBrIRcahlY6QqF', # 有意義但不包含在以上標籤
-  12: 'nj2n7nEBrIRcahlY-gpc', # 無意義
-  13: 'nz2o7nEBrIRcahlYBgqQ', # 廣告
-  14: 'oD2o7nEBrIRcahlYFgpm', # 只有網址其他資訊不足
-  15: 'oT2o7nEBrIRcahlYKQoM', # 政治、政黨
-  16: 'oj2o7nEBrIRcahlYRAox' # 轉發協尋、捐款捐贈
+    0: 'kj287XEBrIRcahlYvQoS',  # 中國影響力
+    1: 'kz3c7XEBrIRcahlYxAp6',  # 性少數與愛滋病
+    2: 'lD3h7XEBrIRcahlYeQqS',  # 女權與性別刻板印象
+    3: 'lT3h7XEBrIRcahlYugqq',  # 保健秘訣、食品安全
+    4: 'lj2m7nEBrIRcahlY6Ao_',  # 基本人權問題
+    5: 'lz2n7nEBrIRcahlYDgri',  # 農林漁牧政策
+    6: 'mD2n7nEBrIRcahlYLAr7',  # 能源轉型
+    7: 'mT2n7nEBrIRcahlYTArI',  # 環境生態保護
+    8: 'mj2n7nEBrIRcahlYdArf',  # 優惠措施、新法規、政策宣導
+    9: 'mz2n7nEBrIRcahlYnQpz',  # 科技、資安、隱私
+    10: 'nD2n7nEBrIRcahlYwQoW',  # 免費訊息詐騙
+    11: 'nT2n7nEBrIRcahlY6QqF',  # 有意義但不包含在以上標籤
+    12: 'nj2n7nEBrIRcahlY-gpc',  # 無意義
+    13: 'nz2o7nEBrIRcahlYBgqQ',  # 廣告
+    14: 'oD2o7nEBrIRcahlYFgpm',  # 只有網址其他資訊不足
+    15: 'oT2o7nEBrIRcahlYKQoM',  # 政治、政黨
+    16: 'oj2o7nEBrIRcahlYRAox'  # 轉發協尋、捐款捐贈
 }
+
 
 def remove_object_id(object):
     object['id'] = str(object['_id'])
@@ -198,9 +199,7 @@ def patch_model(id):
     }
 
 
-
 # POST /v1/categorize/
-
 '''
 input:
 {
@@ -264,7 +263,16 @@ def get_keyword(date_string):
 @ app.route('/v1/tasks', methods=['GET'])
 def get_tasks_by_model():
     model_id = request.args.get('modelId')
-    criteria = {'modelId': model_id}
+    api_key = request.args.get('apiKey')
+    criteria = {}
+    if model_id:
+        criteria['modelId'] = model_id
+    elif api_key:
+        get_model_by_key_result = list(
+            db_client.models.find({'apiKey': api_key}))
+        if len(get_model_by_key_result) > 0:
+            criteria['modelId'] = remove_object_id(
+                get_model_by_key_result[0])['id']
     if request.args.get('test') is None:
         criteria['result'] = {'$exists': False}
     return json.dumps(list(map(remove_object_id, list(db_client.tasks.find(criteria)))), indent=2, ensure_ascii=False)
