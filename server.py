@@ -174,7 +174,16 @@ def post_model():
     if model_info['categoryMapping'] is None:
         model_info['categoryMapping'] = DEFAULT_CATEGORY_MAPPING
 
-    db_client.models.insert_one(model_info)
+    first_10_article_keys = list(data_manager.articles.keys())[:10]
+
+    result = db_client.models.insert_one(model_info)
+
+    for key in first_10_article_keys:
+        yee = db_client.tasks.insert_one({
+            'modelId': str(result.inserted_id),
+            'content': data_manager.articles[key]['text'],
+            'source': data_manager.articles[key]['references'][0]['type']
+        })
 
     return remove_object_id(model_info)
 
