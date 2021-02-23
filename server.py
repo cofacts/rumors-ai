@@ -171,7 +171,7 @@ def post_model():
 
     model_info['apiKey'] = token_urlsafe(32)
     model_info['approved'] = False
-    if model_info['categoryMapping'] is None:
+    if 'categoryMapping' not in model_info:
         model_info['categoryMapping'] = DEFAULT_CATEGORY_MAPPING
 
     first_10_article_keys = list(data_manager.articles.keys())[:10]
