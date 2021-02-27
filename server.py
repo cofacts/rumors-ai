@@ -50,6 +50,35 @@ def remove_object_id(object):
     object.pop('_id', None)
     return object
 
+def write_tasks():
+    finished_tasks = db_client.tasks.find({ 'result': { '$exists': True } })
+    result_mapping = {}
+    cached_models = {}
+
+    def get_model_by_id(modelId):
+        if modelId not in cached_models:
+            cached_models[modelId] = db_client.models.find_one({ 'id': modelId })
+        return modelId
+
+    def parse_key(key):
+        if key[0] == 'c': return int(key[1:])
+        return int(key)
+
+    for task in finished_tasks:
+        model_name = get_model_by_id(task['modelId'])['name']
+        if name not in result_mapping:
+            result_mapping[name] = {}
+        for k, v in task['result']['prediction']['confidence'].items():
+            if v > 0:
+                result_mapping[name][task['articleId']] = [(parse_key(k, 1.0))]
+                break
+
+    print(result_mapping)
+
+    current_date_string = datetime.datetime.now().strftime('%Y%m%d')
+    pickle.dump(result_mapping, open('./result/{}/{}.pkl'.format(settings.ENV, current_date_string), 'wb'))
+
+    data_manager.sync_out()
 
 def process_queue():
     global redis_client
